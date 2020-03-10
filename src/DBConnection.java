@@ -71,7 +71,7 @@ public class DBConnection {
     	        
     	        return true;
 	    	}catch(SQLException e){
-	    		System.out.println("No fue posible agregar el tipo, verifique que este no exita");
+	    		System.out.println(e);
 	    	}
 	    } else {
 	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
@@ -91,7 +91,7 @@ public class DBConnection {
     	        stmt.executeUpdate();
     	        return true;
 	    	}catch(SQLException e){
-	    		System.out.println("No fue posible borrar el tipo, verifique que este existe o el nombre es correcto");
+	    		System.out.println(e);
 	    	}
 	    } else {
 	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
@@ -160,7 +160,7 @@ public class DBConnection {
     	        stmt.executeUpdate();
     	        return true;
 	    	}catch(SQLException e){
-	    		System.out.println("No fue posible agregar la habilidad, verifique que este no exita");
+	    		System.out.println(e);
 	    	}
 	    } else {
 	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
@@ -180,7 +180,7 @@ public class DBConnection {
     	        stmt.executeUpdate();
     	        return true;
 	    	}catch(SQLException e){
-	    		System.out.println("No fue posible borrar la habilidad, verifique que este existe o el nombre es correcto");
+	    		System.out.println(e);
 	    	}
 	    } else {
 	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
@@ -489,7 +489,7 @@ public class DBConnection {
     	        stmt.executeUpdate();
     	        return true;
 	    	}catch(SQLException e){
-	    		System.out.println("No fue posible agregar el tipo, verifique que este no exita");
+	    		System.out.println(e);
 	    	}
 	    } else {
 	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
@@ -515,7 +515,161 @@ public class DBConnection {
 	    return false;
     }
 
+    //methods for users
+    public boolean createUser(String name) throws ClassNotFoundException, SQLException {
+    	CallableStatement stmt = null;
+	    Connection con = getCon();
+	    
+	    if (con != null){
+	    	try{
+    	        stmt = con.prepareCall("{call createUser(?)}");
+    	        stmt.setString(1, name);
+    	        stmt.executeUpdate();
+    	        return true;
+	    	}catch(SQLException e){
+	    		System.out.println(e);
+	    	}
+	    } else {
+	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
+	    	}
+	    return false;
+    }
 
+    public boolean deleteUser(String name)throws ClassNotFoundException, SQLException {
+    	CallableStatement stmt = null;
+	    Connection con = getCon();	    
+	    if (con != null){
+	    	try{
+	    		if (getUserByName(name).getName() != null) {
+	    			//si el usuario existe eliminamos
+	    	        stmt = con.prepareCall("{call deleteUser(?)}");
+	    	        stmt.setString(1, name);
+	    	        stmt.executeUpdate();
+	    	        return true;
+	    		}
+	    	}catch(SQLException e){
+	    		System.out.println(e);
+	    	}
+	    } else {
+	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
+	    }
+	    return false;
+    }
+    
+    public User getUserByName(String name) throws ClassNotFoundException, SQLException{
+    	User user= new User();
+    	List<Pokemon> pokemons;
+    	CallableStatement stmt = null;
+	    ResultSet rs = null;
+	    Connection con = getCon();	    
+	    if (con != null){
+	    	try{
+	    		stmt = con.prepareCall("{call getUserByName(?)}");
+    	        stmt.setString(1, name); 
+    	        rs = stmt.executeQuery();
+    	        while (rs.next() && rs.getString(1) != null) {
+    	        	user = new User(rs.getInt(1), rs.getString(2));
+    	        	pokemons = getUserPokemons(user);
+    	        	user.setOwnPokemons(pokemons);
+    	        }
+	    	}catch(SQLException e){
+	    		System.out.println(e);
+	    	}
+	    	return user;
+	    } else {
+	    	System.out.println("No se pudo establecer coneccion con la base de datos");
+	    	return user;
+	    	} 
+    	
+    }
+    
+    public List<Pokemon> getUserPokemons(User user)  throws ClassNotFoundException, SQLException{
+    	List<Pokemon> pokemons = new ArrayList<Pokemon>();
+	    CallableStatement stmt = null;
+	    ResultSet rs = null;
+	    Connection con = getCon();	    
+	    if (con != null){
+	    	try{
+    	        stmt = con.prepareCall("{call userGetAllPokemons(?)}");
+    	        stmt.setInt(1, user.getId()); 
+    	        rs = stmt.executeQuery();
+    	        while (rs.next()) {
+    	        	Pokemon pokeToAdd = new Pokemon(rs.getString(1),rs.getInt(2), rs.getInt(4), rs.getInt(5));
+    	        	pokeToAdd.setEvolution(getPokemonById(rs.getInt(3)));
+    	        	pokemons.add(pokeToAdd);    	        	
+    	        }
+	    	}catch(SQLException e){
+	    		System.out.println(e);
+	    	}
+	        return pokemons;
+	    } else {
+	    	System.out.println("No se pudo establecer coneccion con la base de datos");
+	    	return pokemons;
+	    	} 
+    }
+    
+    public List<User> getAllUsers() throws ClassNotFoundException, SQLException{
+    	List<User> users = new ArrayList<User>();
+	    CallableStatement stmt = null;
+	    ResultSet rs = null;
+	    Connection con = getCon();	    
+	    if (con != null){
+	    	try{
+    	        stmt = con.prepareCall("{call getAllUser}");
+    	        rs = stmt.executeQuery();
+    	        while (rs.next()) {
+    	        	User user = new User(rs.getInt(1),rs.getString(2));
+    	        	user.setOwnPokemons(getUserPokemons(user));
+    	        	users.add(user);    	        	
+    	        }
+	    	}catch(SQLException e){
+	    		System.out.println(e);
+	    	}
+	        return users;
+	    } else {
+	    	System.out.println("No se pudo establecer coneccion con la base de datos");
+	    	return users;
+	    	} 
+    }
+    
+    public boolean addPokemonToUser(User user, Pokemon pokemon)throws ClassNotFoundException, SQLException { 
+    	CallableStatement stmt = null;
+	    Connection con = getCon();	    
+	    if (con != null){
+	    	try{
+    	        stmt = con.prepareCall("{call userAddPokemon(?,?)}");
+    	        stmt.setInt(1, pokemon.getId());
+    	        stmt.setInt(2, user.getId());
+    	        stmt.executeUpdate();
+    	        return true;
+	    	}catch(SQLException e){
+	    		System.out.println(e);
+	    	}
+	    } else {
+	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
+	    }
+    	return false;
+    }
+
+    public boolean deletePokemonToUser(User user, Pokemon pokemon)throws ClassNotFoundException, SQLException {
+    	CallableStatement stmt = null;
+	    Connection con = getCon();	    
+	    if (con != null){
+	    	try{
+    	        stmt = con.prepareCall("{call userDeletePokemon(?,?)}");
+    	        stmt.setInt(1, pokemon.getId());
+    	        stmt.setInt(2, user.getId()); 
+    	        stmt.executeUpdate();
+    	        return true;
+	    	}catch(SQLException e){
+	    		System.out.println(e);
+	    	}
+	    } else {
+	    	System.out.println("No hay conexcion con la base de datos, verifique esta iniciada y que existe");
+	    }
+	    return false;
+    }
+    
 }
     
     
