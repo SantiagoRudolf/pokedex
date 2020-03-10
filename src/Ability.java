@@ -8,6 +8,9 @@ public class Ability {
 		this.id = id;
 		this.ability = ability;
 	}
+	public Ability() {
+		// TODO Auto-generated constructor stub
+	}
 	public static void main(String[] args) {
 
 	}

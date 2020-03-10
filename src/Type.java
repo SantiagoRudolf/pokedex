@@ -8,6 +8,9 @@ public class Type {
 		this.id = id;
 		this.name = name;
 	}
+	public Type() {
+		// TODO Auto-generated constructor stub
+	}
 	public static void main(String[] args) {
 
 	}

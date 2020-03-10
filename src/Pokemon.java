@@ -1,17 +1,34 @@
+import java.util.ArrayList;
+import java.util.List;
 
 public class Pokemon {
-	int id, evolution, types, abilities, evoLvl, onFound;
+	int id, evoLvl, onFound;
+	Pokemon  evolution;
 	String name;
+	List<Ability> abilities;
+	List<Type> types;
 	
-	public Pokemon(String name, int id, int evolution, int types, int abilities, int evoLvl, int onFound) {
+	public Pokemon(String name, int id, int evoLvl, int onFound) {
 		super();
 		this.id = id;
-		this.evolution = evolution;
-		this.types = types;
-		this.abilities = abilities;
+		this.evolution = new Pokemon();
 		this.evoLvl = evoLvl;
 		this.onFound = onFound;
 		this.name = name;
+		this.abilities = new ArrayList<Ability>();
+		this.types = new ArrayList<Type>();
+	}
+	public List<Ability> getAbilities() {
+		return abilities;
+	}
+	public void setAbilities(List<Ability> abilities) {
+		this.abilities = abilities;
+	}
+	public List<Type> getTypes() {
+		return types;
+	}
+	public void setTypes(List<Type> types) {
+		this.types = types;
 	}
 	public Pokemon() {
 	}
@@ -21,23 +38,11 @@ public class Pokemon {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public int getEvolution() {
+	public Pokemon getEvolution() {
 		return evolution;
 	}
-	public void setEvolution(int evolution) {
+	public void setEvolution(Pokemon evolution) {
 		this.evolution = evolution;
-	}
-	public int getTypes() {
-		return types;
-	}
-	public void setTypes(int types) {
-		this.types = types;
-	}
-	public int getAbilities() {
-		return abilities;
-	}
-	public void setAbilities(int abilities) {
-		this.abilities = abilities;
 	}
 	public int getEvoLvl() {
 		return evoLvl;
